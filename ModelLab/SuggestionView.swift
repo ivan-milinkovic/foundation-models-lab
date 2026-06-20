@@ -1,0 +1,108 @@
+//
+//  SuggestionView.swift
+//  ModelLab
+//
+//  Created by Ivan Milinkovic on 20. 6. 2026.
+//
+
+import SwiftUI
+import FoundationModels
+import Observation
+import Combine
+
+struct SuggestionView: View {
+    
+    @State private var input: String = ""
+    @State private var model = SuggestionModel.shared
+    @State private var inputHandler = InputHandler()
+    
+    var body: some View {
+        VStack {
+            Text("Typing Prediction")
+                .font(.title2)
+            TextEditor(text: $input)
+                .font(.system(size: 16))
+                .frame(height: 50)
+                .border(Color(white: 0.25))
+            Button(model.suggestion) {
+                input += " " + model.suggestion
+            }
+            if model.isResponding {
+                ProgressView()
+                    .frame(width: 24, height: 24)
+            }
+        }
+        .padding()
+        .onChange(of: input, { oldValue, newValue in
+            inputHandler.subject.send(input)
+        })
+        .onReceive(inputHandler.debounced) { input in
+            model.prompt(input)
+        }
+    }
+    
+    final class InputHandler {
+        private(set) var subject = PassthroughSubject<String, Never>()
+        private(set) var debounced: AnyPublisher<String, Never>
+        
+        init() {
+            subject = PassthroughSubject<String, Never>()
+            debounced = subject.debounce(for: .seconds(1), scheduler: DispatchQueue.main).eraseToAnyPublisher()
+        }
+    }
+}
+
+#Preview {
+    SuggestionView()
+}
+
+@Observable
+final class SuggestionModel {
+    
+    static let shared = SuggestionModel()
+    
+    @ObservationIgnored private let model: SystemLanguageModel
+    @ObservationIgnored private let session: LanguageModelSession
+    
+    private(set) var suggestion = ""
+    private(set) var isResponding = false
+    
+    init() {
+        model = SystemLanguageModel.default
+        switch model.availability {
+        case .available:
+            break
+        case .unavailable(let unavailableReason):
+            print("Model unavailable: \(unavailableReason)")
+        }
+        
+        session = LanguageModelSession(
+            model: model,
+            tools: [],
+            instructions: 
+                """
+Your role is to help user type, by providing typing suggestions based on user input. Your output should be a string of text that completes the input. Do not ask for clarifications, and do not repeat input, but only provide the next word or phrase.
+"""
+        )
+        
+        session.prewarm()
+    }
+    
+    func prompt(_ prompt: String) {
+        guard !prompt.isEmpty else {
+            suggestion = ""
+            return
+        }
+        guard !isResponding else { return }
+        isResponding = true
+        Task {
+            defer { isResponding = false }
+            do {
+                 let response = try await session.respond(to: prompt)
+                 suggestion = response.content
+            } catch {
+                suggestion = error.localizedDescription
+            }
+        }
+    }
+}
