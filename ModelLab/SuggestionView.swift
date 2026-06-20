@@ -88,6 +88,8 @@ Your role is to help user type, by providing typing suggestions based on user in
         session.prewarm()
     }
     
+    let generationOptions = GenerationOptions(sampling: .none, temperature: 1.0, maximumResponseTokens: 2048)
+    
     func prompt(_ prompt: String) {
         guard !prompt.isEmpty else {
             suggestion = ""
@@ -98,7 +100,8 @@ Your role is to help user type, by providing typing suggestions based on user in
         Task {
             defer { isResponding = false }
             do {
-                 let response = try await session.respond(to: prompt)
+                 // let response = try await session.respond(to: prompt)
+                 let response = try await session.respond(to: prompt, options: generationOptions)
                  suggestion = response.content
             } catch {
                 suggestion = error.localizedDescription

@@ -91,11 +91,14 @@ final class QuestionAnswerModel {
         session.prewarm()
     }
     
+    let generationOptions = GenerationOptions(sampling: nil, temperature: 1.0, maximumResponseTokens: 1024)
+    
     func prompt(_ prompt: String) async -> Bool {
         isResponding = true
         defer { isResponding = false }
         do {
-            let response = try await session.respond(to: prompt)
+            // let response = try await session.respond(to: prompt)
+            let response = try await session.respond(to: prompt, options: generationOptions)
             history += "Q: " + prompt + "\n"
             history += "A: " + response.content + "\n"
             return true

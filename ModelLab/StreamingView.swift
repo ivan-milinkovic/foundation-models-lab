@@ -102,12 +102,15 @@ final class StreamingModel {
         session.prewarm()
     }
     
+    let generationOptions = GenerationOptions(sampling: .none, temperature: 1.0, maximumResponseTokens: 1024)
+    
     func prompt(_ prompt: String) {
         isResponding = true
         task = Task {
             defer { isResponding = false }
             history += "Q: " + prompt + "\n"
-            let stream = session.streamResponse(to: prompt)
+            // let stream = session.streamResponse(to: prompt)
+            let stream = session.streamResponse(to: prompt, options: generationOptions)
             do {
                 for try await partial in stream {
                     inProgressAnswer = partial.content
