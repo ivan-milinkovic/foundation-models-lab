@@ -28,6 +28,7 @@ struct TaggingView: View {
                     RoundedRectangle(cornerRadius: 8)
                         .stroke(Color(white: 0.25))
                 }
+                .frame(height: 100)
             
             HStack {
                 if model.isResponding {
