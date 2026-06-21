@@ -15,29 +15,35 @@ struct SuggestionView: View {
     @State private var input: String = ""
     @State private var model = SuggestionModel.shared
     @State private var inputHandler = InputHandler()
+    @FocusState private var focused: Bool
     
     var body: some View {
         VStack {
-            Text("Typing Prediction")
-                .font(.title2)
             TextEditor(text: $input)
                 .font(.system(size: 16))
+                .focused($focused)
                 .frame(height: 50)
                 .border(Color(white: 0.25))
             Button(model.suggestion) {
                 input += " " + model.suggestion
             }
+            .keyboardShortcut(.return, modifiers: .command)
+            
             if model.isResponding {
                 ProgressView()
                     .frame(width: 24, height: 24)
             }
         }
+        .navigationTitle("Suggestions")
         .padding()
         .onChange(of: input, { oldValue, newValue in
             inputHandler.subject.send(input)
         })
         .onReceive(inputHandler.debounced) { input in
             model.prompt(input)
+        }
+        .task {
+            focused = true
         }
     }
     
@@ -74,6 +80,7 @@ final class SuggestionModel {
             break
         case .unavailable(let unavailableReason):
             print("Model unavailable: \(unavailableReason)")
+            suggestion = "Model unavailable: \(unavailableReason)"
         }
         
         session = LanguageModelSession(

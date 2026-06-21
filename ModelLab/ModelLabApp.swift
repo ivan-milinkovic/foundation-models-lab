@@ -2,7 +2,7 @@
 //  ModelLabApp.swift
 //  ModelLab
 //
-//  Created by Ivan Milinkovic on 20. 6. 2026..
+//  Created by Ivan Milinkovic on 20. 6. 2026.
 //
 
 import SwiftUI

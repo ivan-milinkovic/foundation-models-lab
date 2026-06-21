@@ -1,5 +1,5 @@
 //
-//  QuestionAnswerView.swift
+//  TaggingView.swift
 //  ModelLab
 //
 //  Created by Ivan Milinkovic on 20. 6. 2026.
@@ -10,43 +10,41 @@ import FoundationModels
 import Observation
 import Combine
 
-struct QuestionAnswerView: View {
+struct TaggingView: View {
     
     @State private var input: String = ""
-    @State private var model = QuestionAnswerModel.shared
-    @State private var outHeight: CGFloat = 0
+    @State private var model = ContentTaggingModel.shared
+    @FocusState private var focused: Bool
     
     var body: some View {
         VStack {
-            Text("Question - Answer")
-                .font(.title2)
             ScrollView {
                 Text(model.history)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .onGeometryChange(for: CGFloat.self) { proxy in
-                        proxy.size.height
-                    } action: { newValue in
-                        self.outHeight = min(newValue, 200)
-                    }
             }
             .defaultScrollAnchor(.bottom)
-            .frame(height: outHeight)
             
             TextEditor(text: $input)
                 .font(.system(size: 16))
+                .focused($focused)
                 .frame(height: 50)
                 .border(Color(white: 0.25))
             
-            if model.isResponding {
-                ProgressView()
-                    .frame(width: 24, height: 24)
-            } else {
+            HStack {
+                if model.isResponding {
+                    ProgressView()
+                        .frame(width: 24, height: 24)
+                }
                 Button("Send") { submit() }
-                    // .keyboardShortcut(.return, modifiers: .command)
+                    .keyboardShortcut(.return, modifiers: .command)
+                    .disabled(model.isResponding)
             }
         }
-        .disabled(model.isResponding)
+        .navigationTitle("Tagging")
         .padding()
+        .task {
+            focused = true
+        }
     }
     
     func submit() {
@@ -61,25 +59,24 @@ struct QuestionAnswerView: View {
 }
 
 #Preview {
-    QuestionAnswerView()
+    TaggingView()
 }
 
 @Observable
-final class QuestionAnswerModel {
-    static let shared = QuestionAnswerModel()
+final class ContentTaggingModel {
+    static let shared = ContentTaggingModel()
     @ObservationIgnored private let model: SystemLanguageModel
     @ObservationIgnored private let session: LanguageModelSession
     private(set) var history = ""
     private(set) var isResponding = false
     
     init() {
-        model = SystemLanguageModel.default
-        // model = SystemLanguageModel(useCase: .contentTagging)
+        model = SystemLanguageModel(useCase: .contentTagging)
         switch model.availability {
         case .available:
             break
         case .unavailable(let unavailableReason):
-            print("Model unavailable: \(unavailableReason)")
+            history = "Model unavailable: \(unavailableReason)"
         }
         
         session = LanguageModelSession(

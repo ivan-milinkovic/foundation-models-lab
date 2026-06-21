@@ -1,5 +1,5 @@
 //
-//  StreamingView.swift
+//  ChatView.swift
 //  ModelLab
 //
 //  Created by Ivan Milinkovic on 20. 6. 2026.
@@ -10,27 +10,19 @@ import FoundationModels
 import Observation
 import Combine
 
-struct StreamingView: View {
+struct ChatView: View {
     
     @State private var input: String = ""
-    @State private var model = StreamingModel.shared
-    @State private var outHeight: CGFloat = 0
+    @State private var model = ChatModel.shared
+    @FocusState private var focused: Bool
     
     var body: some View {
         VStack {
-            Text("Streaming Answer")
-                .font(.title2)
             ScrollView {
                 Text(model.history)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .onGeometryChange(for: CGFloat.self) { proxy in
-                        proxy.size.height
-                    } action: { newValue in
-                        self.outHeight = min(newValue, 200)
-                    }
             }
             .defaultScrollAnchor(.bottom)
-            .frame(height: outHeight)
             .frame(maxWidth: .infinity)
             
             if !model.inProgressAnswer.isEmpty {
@@ -45,6 +37,7 @@ struct StreamingView: View {
             
             TextEditor(text: $input)
                 .font(.system(size: 16))
+                .focused($focused)
                 .frame(height: 50)
                 .border(Color(white: 0.25))
             
@@ -53,13 +46,18 @@ struct StreamingView: View {
                     ProgressView()
                         .frame(width: 24, height: 24)
                     Button("Stop") { model.cancel() }
+                        .keyboardShortcut(".", modifiers: .command)
                 }
             } else {
                 Button("Send") { submit() }
-                    // .keyboardShortcut(.return, modifiers: .command)
+                    .keyboardShortcut(.return, modifiers: .command)
             }
         }
+        .navigationTitle("Chat")
         .padding()
+        .task {
+            focused = true
+        }
     }
     
     func submit() {
@@ -70,12 +68,12 @@ struct StreamingView: View {
 }
 
 #Preview {
-    StreamingView()
+    ChatView()
 }
 
 @Observable
-final class StreamingModel {
-    static let shared = StreamingModel()
+final class ChatModel {
+    static let shared = ChatModel()
     @ObservationIgnored private let model: SystemLanguageModel
     @ObservationIgnored private let session: LanguageModelSession
     @ObservationIgnored private var task: Task<Void, Never>?
@@ -90,7 +88,7 @@ final class StreamingModel {
         case .available:
             break
         case .unavailable(let unavailableReason):
-            print("Model unavailable: \(unavailableReason)")
+            history = "Model unavailable: \(unavailableReason)"
         }
         
         session = LanguageModelSession(

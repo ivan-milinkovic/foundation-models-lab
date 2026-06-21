@@ -8,14 +8,45 @@
 import SwiftUI
 
 struct ContentView: View {
+    
+    enum Route {
+        case chat, suggestion, tagging
+    }
+    @State private var route: Route?
+
     var body: some View {
-        VStack(spacing: 20) {
-            QuestionAnswerView().card()
-            StreamingView().card()
-            SuggestionView().card()
+        NavigationSplitView {
+            List(selection: $route) {
+                NavigationLink("Chat", value: Route.chat)
+                NavigationLink("Suggestions", value: Route.suggestion)
+                NavigationLink("Tagging", value: Route.tagging)
+            }
+            .listStyle(.sidebar)
+            #if os(iOS)
+            .toolbar {
+                ToolbarItem(placement: .principal) {
+                    Text("Foundation Models Lab")
+                        .font(.title)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                }
+            }
+            #endif // os(iOS)
+        } detail: {
+            switch route {
+            case .chat:
+                ChatView()
+            case .suggestion:
+                SuggestionView()
+            case .tagging:
+                TaggingView()
+            case .none:
+                Text("Select from the sidebar")
+            }
         }
-        .frame(minHeight: 700)
-        .padding()
+        #if os(macOS)
+        .navigationTitle("Foundation Models Lab")
+        #endif
     }
 }
 
