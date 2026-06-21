@@ -39,7 +39,10 @@ struct ChatView: View {
                 .font(.system(size: 16))
                 .focused($focused)
                 .frame(height: 50)
-                .border(Color(white: 0.25))
+                .overlay {
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(Color(white: 0.25))
+                }
             
             if model.isResponding {
                 HStack {

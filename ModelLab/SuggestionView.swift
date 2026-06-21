@@ -22,11 +22,14 @@ struct SuggestionView: View {
             TextEditor(text: $input)
                 .font(.system(size: 16))
                 .focused($focused)
-                .frame(height: 50)
-                .border(Color(white: 0.25))
+                .overlay {
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(Color(white: 0.25))
+                }
             Button(model.suggestion) {
                 input += " " + model.suggestion
             }
+            .frame(height: 40)
             .keyboardShortcut(.return, modifiers: .command)
             
             if model.isResponding {
@@ -95,7 +98,7 @@ Your role is to help user type, by providing typing suggestions based on user in
         session.prewarm()
     }
     
-    let generationOptions = GenerationOptions(sampling: .none, temperature: 1.0, maximumResponseTokens: 2048)
+    let generationOptions = GenerationOptions(sampling: .none, temperature: 1.0, maximumResponseTokens: 256)
     
     func prompt(_ prompt: String) {
         guard !prompt.isEmpty else {

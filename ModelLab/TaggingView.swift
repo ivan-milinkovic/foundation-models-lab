@@ -27,8 +27,10 @@ struct TaggingView: View {
             TextEditor(text: $input)
                 .font(.system(size: 16))
                 .focused($focused)
-                .frame(height: 50)
-                .border(Color(white: 0.25))
+                .overlay {
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(Color(white: 0.25))
+                }
             
             HStack {
                 if model.isResponding {
