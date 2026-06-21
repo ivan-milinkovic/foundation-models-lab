@@ -91,7 +91,7 @@ final class SuggestionModel {
             tools: [],
             instructions: 
                 """
-Your role is to help user type, by providing typing suggestions based on user input. Your output should be a string of text that completes the input. Do not ask for clarifications, and do not repeat input, but only provide the next word or phrase.
+Your role is to help user type, by providing typing suggestions based on user input. Your output should be a string of text that completes the input. Do not ask for clarifications, and do not repeat input, but only provide the next word or phrase. Limit to only a few words.
 """
         )
         
