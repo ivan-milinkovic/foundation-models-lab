@@ -7,19 +7,20 @@
 
 import SwiftUI
 
-struct CardViewModifier: ViewModifier {
+struct CardViewModifier<S>: ViewModifier where S: ShapeStyle {
+    let shapeStyle: S
     func body(content: Content) -> some View {
         content
             .padding()
             .background(
                 RoundedRectangle(cornerRadius: 12)
-                    .fill(.thinMaterial)
+                    .fill(shapeStyle)
             )
     }
 }
 
 extension View {
-    func card() -> some View {
-        self.modifier(CardViewModifier())
+    func card<S>(_ shapeStyle: S) -> some View where S: ShapeStyle {
+        self.modifier(CardViewModifier(shapeStyle: shapeStyle))
     }
 }

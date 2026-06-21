@@ -17,10 +17,17 @@ struct ChatView: View {
         VStack {
             ScrollView {
                 ForEach(model.messages) { msg in
-                    Text(prepareContent(msg.content))
-                        .textSelection(.enabled)
-                        .card()
-                        .frame(maxWidth: .infinity, alignment: msg.role == .user ? .trailing : .leading)
+                    if msg.role == .user {
+                        Text(prepareContent(msg.content))
+                            .textSelection(.enabled)
+                            .card(.blue)
+                            .frame(maxWidth: .infinity, alignment: .trailing)
+                    } else {
+                        Text(prepareContent(msg.content))
+                            .textSelection(.enabled)
+                            .card(.ultraThinMaterial)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
                 }
             }
             .defaultScrollAnchor(.bottom)
