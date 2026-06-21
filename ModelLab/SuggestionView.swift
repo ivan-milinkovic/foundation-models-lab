@@ -26,15 +26,20 @@ struct SuggestionView: View {
                     RoundedRectangle(cornerRadius: 8)
                         .stroke(Color(white: 0.25))
                 }
-            Button(model.suggestion) {
-                input += " " + model.suggestion
-            }
-            .frame(height: 40)
-            .keyboardShortcut(.return, modifiers: .command)
             
-            if model.isResponding {
-                ProgressView()
-                    .frame(width: 24, height: 24)
+            HStack {
+                Button(model.suggestion) {
+                    input += " " + model.suggestion
+                }
+                .frame(height: 40)
+                .keyboardShortcut(.return, modifiers: .command)
+                
+                Spacer()
+                
+                if model.isResponding {
+                    ProgressView()
+                        .frame(width: 24, height: 24)
+                }
             }
         }
         .navigationTitle("Suggestions")
