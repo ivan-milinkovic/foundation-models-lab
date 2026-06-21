@@ -49,19 +49,3 @@ struct ContentView: View {
 #Preview {
     ContentView()
 }
-
-struct CardViewModifier: ViewModifier {
-    func body(content: Content) -> some View {
-        content
-            .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(.gray)
-            )
-    }
-}
-
-extension View {
-    func card() -> some View {
-        self.modifier(CardViewModifier())
-    }
-}

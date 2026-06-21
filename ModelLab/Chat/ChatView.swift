@@ -16,8 +16,12 @@ struct ChatView: View {
     var body: some View {
         VStack {
             ScrollView {
-                Text(prepareString())
-                .frame(maxWidth: .infinity, alignment: .leading)
+                ForEach(model.messages) { msg in
+                    Text(prepareContent(msg.content))
+                        .textSelection(.enabled)
+                        .card()
+                        .frame(maxWidth: .infinity, alignment: msg.role == .user ? .trailing : .leading)
+                }
             }
             .defaultScrollAnchor(.bottom)
             .frame(maxWidth: .infinity)
@@ -53,15 +57,12 @@ struct ChatView: View {
         }
     }
     
-    func prepareString() -> AttributedString {
-        let text = model.history + model.inProgressAnswer
-        let options = AttributedString.MarkdownParsingOptions(
-                interpretedSyntax: .inlineOnlyPreservingWhitespace
-            )
-        if let astr = try? AttributedString(markdown: text, options: options) {
+    func prepareContent(_ content: String) -> AttributedString {
+        let opts = AttributedString.MarkdownParsingOptions(interpretedSyntax: .inlineOnlyPreservingWhitespace)
+        if let astr = try? AttributedString(markdown: content, options: opts) {
             return astr
         } else {
-            return AttributedString(stringLiteral: text)
+            return AttributedString(stringLiteral: content)
         }
     }
     

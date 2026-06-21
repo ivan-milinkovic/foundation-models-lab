@@ -15,18 +15,27 @@ final class ChatModel {
     @ObservationIgnored private let model: SystemLanguageModel
     @ObservationIgnored private let session: LanguageModelSession
     @ObservationIgnored private var task: Task<Void, Never>?
-    private(set) var history = ""
-    private(set) var inProgressAnswer = ""
     private(set) var isResponding = false
+    private(set) var messages: [Message] = []
+    
+    struct Message: Identifiable {
+        let id = UUID()
+        let role: Role
+        let content: String
+    }
+    
+    enum Role {
+        case user, model
+    }
     
     init() {
         model = SystemLanguageModel.default
-        // model = SystemLanguageModel(useCase: .contentTagging)
+        var errorMessage: String?
         switch model.availability {
         case .available:
             break
         case .unavailable(let unavailableReason):
-            history = "Model unavailable: \(unavailableReason)"
+            errorMessage = "Model unavailable: \(unavailableReason)"
         }
         
         session = LanguageModelSession(
@@ -34,6 +43,10 @@ final class ChatModel {
             tools: [],
             instructions: nil
         )
+        
+        if let errorMessage {
+            messages.append(Message(role: .model, content: errorMessage))
+        }
         
         session.prewarm()
     }
@@ -44,19 +57,26 @@ final class ChatModel {
         isResponding = true
         task = Task {
             defer { isResponding = false }
-            history += "\n\n\nQ: " + prompt + "\n\n"
+            messages.append(Message(role: .user, content: prompt))
+            messages.append(Message(role: .model, content: ""))
+            
             // let stream = session.streamResponse(to: prompt)
             let stream = session.streamResponse(to: prompt, options: generationOptions)
             do {
                 for try await partial in stream {
-                    inProgressAnswer = partial.content
+                    guard let lastMsg = messages.last,
+                          lastMsg.role == .model,
+                          let lastIndex = messages.indices.last
+                    else {
+                        fatalError("Last message must be a model message with model role")
+                    }
+                    let updatedMessage = Message(role: .model, content: partial.content)
+                    messages[lastIndex] = updatedMessage
                     // if Task.isCancelled { break } // not reachable, on Task cancellation the stream just ends the loop
                 }
             } catch {
-                inProgressAnswer += "Error: " + error.localizedDescription + "\n"
+                messages.append(Message(role: .model, content: "Error: " + error.localizedDescription))
             }
-            history += "A: " + inProgressAnswer + "\n"
-            inProgressAnswer = ""
         }
     }
     
@@ -64,3 +84,4 @@ final class ChatModel {
         task?.cancel()
     }
 }
+
