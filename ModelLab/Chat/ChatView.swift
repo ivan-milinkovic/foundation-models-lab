@@ -16,26 +16,19 @@ struct ChatView: View {
     var body: some View {
         VStack {
             ScrollView {
-                Text(model.history)
+                Text(model.history + model.inProgressAnswer)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
             .defaultScrollAnchor(.bottom)
             .frame(maxWidth: .infinity)
+            .scrollDismissesKeyboard(.interactively)
             
-            if !model.inProgressAnswer.isEmpty {
-                ScrollView {
-                    Text(model.inProgressAnswer)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                }
-                .defaultScrollAnchor(.bottom)
-                .frame(maxHeight: 100)
-                .frame(maxWidth: .infinity)
-            }
-            
-            TextEditor(text: $input)
+            TextField("", text: $input, axis: .vertical)
                 .font(.system(size: 16))
                 .focused($focused)
-                .frame(height: 50)
+                .lineLimit(1...4)
+                .keyboardType(.default)
+                .padding(14)
                 .overlay {
                     RoundedRectangle(cornerRadius: 8)
                         .stroke(Color(white: 0.25))

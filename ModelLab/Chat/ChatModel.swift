@@ -44,7 +44,7 @@ final class ChatModel {
         isResponding = true
         task = Task {
             defer { isResponding = false }
-            history += "Q: " + prompt + "\n"
+            history += "\n\n\nQ: " + prompt + "\n\n"
             // let stream = session.streamResponse(to: prompt)
             let stream = session.streamResponse(to: prompt, options: generationOptions)
             do {
