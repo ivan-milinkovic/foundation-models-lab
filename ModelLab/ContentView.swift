@@ -13,6 +13,7 @@ struct ContentView: View {
         case chat, suggestion, tagging
     }
     @State private var route: Route?
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
     var body: some View {
         NavigationSplitView {
@@ -22,16 +23,6 @@ struct ContentView: View {
                 NavigationLink("Tagging", value: Route.tagging)
             }
             .listStyle(.sidebar)
-            #if os(iOS)
-            .toolbar {
-                ToolbarItem(placement: .principal) {
-                    Text("Foundation Models Lab")
-                        .font(.title)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.7)
-                }
-            }
-            #endif // os(iOS)
         } detail: {
             switch route {
             case .chat:
@@ -41,12 +32,17 @@ struct ContentView: View {
             case .tagging:
                 TaggingView()
             case .none:
-                Text("Select from the sidebar")
+                Text("Select an option from the sidebar")
             }
         }
         #if os(macOS)
         .navigationTitle("Foundation Models Lab")
         #endif
+        .task {
+            if horizontalSizeClass == .regular {
+                route = .chat
+            }
+        }
     }
 }
 
