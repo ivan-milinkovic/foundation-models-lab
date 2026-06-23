@@ -9,6 +9,12 @@ import Foundation
 import FoundationModels
 import Observation
 
+@Generable
+struct TaggingResult {
+    @Guide(description: "3-5 words describing the content")
+    let tags: [String]
+}
+
 @Observable
 final class TaggingModel {
     static let shared = TaggingModel()
@@ -42,9 +48,11 @@ final class TaggingModel {
         defer { isResponding = false }
         do {
             // let response = try await session.respond(to: prompt)
-            let response = try await session.respond(to: prompt, options: generationOptions)
-            history += "Q: " + prompt + "\n"
-            history += "A: " + response.content + "\n"
+            let response = try await session.respond(to: prompt, generating: TaggingResult.self, options: generationOptions)
+            history += "Q: " + prompt + "\n\n"
+            let res = response.content
+            let tagsStr = res.tags.joined(separator: ", ")
+            history += "A: " + tagsStr + "\n\n\n"
             return true
         } catch {
             history += "Error: " + error.localizedDescription + "\n"

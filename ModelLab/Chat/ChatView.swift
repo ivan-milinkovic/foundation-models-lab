@@ -38,7 +38,6 @@ struct ChatView: View {
                 .font(.system(size: 16))
                 .focused($focused)
                 .lineLimit(1...4)
-                .keyboardType(.default)
                 .padding(14)
                 .overlay {
                     RoundedRectangle(cornerRadius: 8)
