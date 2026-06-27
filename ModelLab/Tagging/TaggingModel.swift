@@ -15,7 +15,7 @@ struct TaggingResult {
     let tags: [String]
 }
 
-@Observable
+@Observable @MainActor
 final class TaggingModel {
     static let shared = TaggingModel()
     @ObservationIgnored private let model: SystemLanguageModel

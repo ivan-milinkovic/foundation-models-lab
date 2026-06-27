@@ -9,7 +9,7 @@ import Foundation
 import FoundationModels
 import Observation
 
-@Observable
+@Observable @MainActor
 final class ChatModel {
     static let shared = ChatModel()
     @ObservationIgnored private let model: SystemLanguageModel

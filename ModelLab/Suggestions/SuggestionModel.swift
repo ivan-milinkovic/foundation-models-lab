@@ -9,7 +9,7 @@ import Foundation
 import FoundationModels
 import Observation
 
-@Observable
+@MainActor @Observable
 final class SuggestionModel {
     
     static let shared = SuggestionModel()

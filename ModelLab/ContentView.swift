@@ -10,7 +10,7 @@ import SwiftUI
 struct ContentView: View {
     
     enum Route {
-        case chat, suggestion, tagging
+        case chat, suggestion, tagging, vision
     }
     @State private var route: Route?
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
@@ -18,11 +18,17 @@ struct ContentView: View {
     var body: some View {
         NavigationSplitView {
             List(selection: $route) {
-                NavigationLink("Chat", value: Route.chat)
-                NavigationLink("Suggestions", value: Route.suggestion)
-                NavigationLink("Tagging", value: Route.tagging)
+                Section("Foundation Models") {
+                    NavigationLink("Chat", value: Route.chat)
+                    NavigationLink("Suggestions", value: Route.suggestion)
+                    NavigationLink("Tagging", value: Route.tagging)
+                }
+                Section("Vision") {
+                    NavigationLink("Vision", value: Route.vision)
+                }
             }
             .listStyle(.sidebar)
+            .navigationTitle("Models Lab")
         } detail: {
             switch route {
             case .chat:
@@ -31,12 +37,14 @@ struct ContentView: View {
                 SuggestionView()
             case .tagging:
                 TaggingView()
+            case .vision:
+                VisionView()
             case .none:
                 Text("Select an option from the sidebar")
             }
         }
         #if os(macOS)
-        .navigationTitle("Foundation Models Lab")
+        .navigationTitle("Models Lab")
         #endif
         .task {
             if horizontalSizeClass == .regular {
