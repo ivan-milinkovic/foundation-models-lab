@@ -41,7 +41,7 @@ actor CameraService: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate {
     }
     
     func stop() {
-        guard let session, session.isRunning == false else { return }
+        guard let session, session.isRunning else { return }
         session.stopRunning()
         print("Camera stopped")
     }
