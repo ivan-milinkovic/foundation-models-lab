@@ -34,19 +34,16 @@ actor CameraService: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate {
         self.callback = callback
     }
     
-    func start(){
-        guard session?.isRunning == false else { return }
-        Task.detached(priority: .userInitiated) {
-            await self.session?.startRunning()
-            print("Camera started")
-        }
+    func start() {
+        guard let session, !session.isRunning else { return }
+        session.startRunning()
+        print("Camera started")
     }
     
     func stop() {
-        Task.detached(priority: .userInitiated) {
-            await self.session?.stopRunning()
-            print("Camera stopped")
-        }
+        guard let session, session.isRunning == false else { return }
+        session.stopRunning()
+        print("Camera stopped")
     }
     
     func getSession() async -> SendableWrapper<AVCaptureSession>? {
