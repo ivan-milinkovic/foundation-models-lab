@@ -51,8 +51,7 @@ struct VisionView: View {
             for (i, group) in viewModel.detectionGroups.enumerated() {
                 let color = colors[i % colors.count]
                 for point in group.points {
-                    // let x = point.coords.x * size.width
-                    let x = (1 - point.coords.x) * size.width
+                    let x = point.coords.x * size.width
                     let y = (1 - point.coords.y) * size.height
                     let r = CGRect(x: x-5, y: y-5, width: 10, height: 10)
                     ctx.fill(Path(ellipseIn: r), with: .color(color))
@@ -75,6 +74,8 @@ import Vision
 
 @Observable @MainActor final class VisionViewModel {
     @ObservationIgnored let cameraService = CameraService()
+    @ObservationIgnored var detectionRequest: VNImageBasedRequest?
+    @ObservationIgnored var orientation = CGImagePropertyOrientation.leftMirrored
     var session: AVCaptureSession?
     var message: String?
     var detectionType: DetectionType = .face
@@ -100,8 +101,6 @@ import Vision
         }
     }
     
-    var detectionRequest: VNImageBasedRequest?
-    
     func handleBuffer(_ buffer: SendableWrapper<CMSampleBuffer>) {
         guard detectionRequest == nil else {
             return
@@ -115,7 +114,7 @@ import Vision
         }
         defer { detectionRequest = nil}
         
-        let imageHandler = VNImageRequestHandler(cmSampleBuffer: buffer.value, orientation: .right)
+        let imageHandler = VNImageRequestHandler(cmSampleBuffer: buffer.value, orientation: orientation)
         do {
             try imageHandler.perform([detectionRequest!])
             guard let observations = detectionRequest?.results else { return }

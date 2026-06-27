@@ -16,6 +16,7 @@ nonisolated struct SendableWrapper<T>: @unchecked Sendable {
 actor CameraService: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate {
     
     private(set) var session: AVCaptureSession?
+    private var output: AVCaptureVideoDataOutput?
     // private var rotationCoordinator: AVCaptureDevice.RotationCoordinator?
     private let outputQueue = DispatchQueue(label: "camera-output-queue", qos: .userInitiated, autoreleaseFrequency: .workItem)
     
@@ -108,14 +109,15 @@ actor CameraService: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate {
             throw CameraServiceError.cannotAddOutput
         }
         session.addOutput(output)
+        self.output = output
         
-        // rotationCoordinator = AVCaptureDevice.RotationCoordinator(device: device, previewLayer: nil)
+//        rotationCoordinator = AVCaptureDevice.RotationCoordinator(device: device, previewLayer: nil)
 //        if let conn = output.connection(with: .video) {
 //            if conn.isVideoMirroringSupported {
 //                conn.isVideoMirrored = true
 //            }
 //            conn.isVideoMirrored = true
-//            conn.videoRotationAngle = 90
+//            conn.videoRotationAngle = 270
 //        }
         
         session.commitConfiguration()
