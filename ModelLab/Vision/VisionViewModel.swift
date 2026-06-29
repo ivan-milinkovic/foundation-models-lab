@@ -140,7 +140,7 @@ import Vision
         eyePoint = leftEyeCentroid
         
         if Date().timeIntervalSince(eyesLastHistoryDate) >= eyesHistoryDeltaTime
-            // && (abs(leftEyeCentroid.x - eyeHistory[0].x) > 10 || abs(leftEyeCentroid.y - eyeHistory[0].y) > 10)
+            // && (abs(leftEyeCentroid.x - eyeHistory[0].x) > 5 || abs(leftEyeCentroid.y - eyeHistory[0].y) > 5)
         {
             for i in 0..<eyeHistory.count-1 {
                 eyeHistory[i+1] = eyeHistory[i]
