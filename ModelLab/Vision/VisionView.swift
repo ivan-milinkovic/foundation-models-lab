@@ -49,21 +49,38 @@ struct VisionView: View {
         CameraPreview(session: session)
             .overlay {
                 switch viewModel.detectionType {
-                case .face: points
-                case .pose: points
-                case .eyes: linesHistory
+                case .face: facePoints
+                case .pose: bodyPosePoints
+                case .eyes: eyeLines
                 }
             }
     }
     
-    @ViewBuilder private var points: some View {
+    @ViewBuilder private var bodyPosePoints: some View {
         Canvas { ctx, size in
-            for (i, group) in viewModel.detectionGroups.enumerated() {
+            for (i, group) in viewModel.bodyPoseGroups.enumerated() {
                 let color = colors[i % colors.count]
                 for point in group.points {
                     let x = point.coords.x * size.width
                     let y = (1 - point.coords.y) * size.height
                     let r = CGRect(x: x-5, y: y-5, width: 10, height: 10)
+                    ctx.fill(Path(ellipseIn: r), with: .color(color))
+                    let r2 = CGRect(x: x-5, y: y-10, width: 200, height: 50)
+                    ctx.draw(Text(point.name), in: r2)
+                }
+            }
+        }
+    }
+    
+    @ViewBuilder private var facePoints: some View {
+        let dotSize = 7.0
+        Canvas { ctx, size in
+            for (i, group) in viewModel.faceGroups.enumerated() {
+                let color = colors[i % colors.count]
+                for point in group.points {
+                    let x = point.coords.x * size.width
+                    let y = (1 - point.coords.y) * size.height
+                    let r = CGRect(x: x-dotSize/2, y: y-dotSize/2, width: dotSize, height: dotSize)
                     ctx.fill(Path(ellipseIn: r), with: .color(color))
                     let r2 = CGRect(x: x-5, y: y-10, width: 200, height: 50)
                     ctx.draw(Text(point.name), in: r2)
@@ -86,7 +103,7 @@ struct VisionView: View {
         }
     }
     
-    @ViewBuilder private var linesHistory: some View {
+    @ViewBuilder private var eyeLines: some View {
         Canvas { ctx, size in
             let color = colors[1]
             var path = Path()

@@ -18,7 +18,8 @@ import Vision
     var message: String?
     var detectionType: DetectionType = .face
     
-    var detectionGroups: [DetectionGroup] = []
+    var bodyPoseGroups: [DetectionGroup] = []
+    var faceGroups: [DetectionGroup] = []
     var eyeHistory: [CGPoint] = .init(repeating: .zero, count: 16)
     
     enum DetectionType: CaseIterable {
@@ -91,7 +92,7 @@ import Vision
     }
     
     func processBodyPose(_ observations: [VNHumanBodyPoseObservation]) throws {
-        detectionGroups = try observations
+        bodyPoseGroups = try observations
             .filter { $0.confidence > 0.4 }
             .map {
                 let dict = try $0.recognizedPoints(.all)
@@ -105,7 +106,7 @@ import Vision
     let onePoint = false
     
     func processFaceLandmarks(_ observations: [VNFaceObservation]) {
-        detectionGroups = observations.compactMap { face in
+        faceGroups = observations.compactMap { face in
             guard let landmarks = face.landmarks,
                   let allPoints = landmarks.allPoints else { return nil }
             let box = face.boundingBox
@@ -121,7 +122,6 @@ import Vision
     func processEyesLandmarks(_ observations: [VNFaceObservation]) {
         guard let face = observations.first,
               let leftEye: VNFaceLandmarkRegion2D = face.landmarks?.leftEye else { return }
-        
         let points = leftEye.normalizedPoints
         guard !points.isEmpty else { return }
         let bbox = face.boundingBox
