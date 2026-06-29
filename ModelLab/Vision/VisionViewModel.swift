@@ -20,7 +20,11 @@ import Vision
     
     var bodyPoseGroups: [DetectionGroup] = []
     var faceGroups: [DetectionGroup] = []
-    var eyeHistory: [CGPoint] = .init(repeating: .zero, count: 16)
+    
+    var eyePoint: CGPoint = .zero
+    var eyeHistory: [CGPoint] = .init(repeating: .zero, count: 64)
+    let eyesHistoryDeltaTime: TimeInterval = 0.033
+    var eyesLastHistoryDate: Date = Date()
     
     enum DetectionType: CaseIterable {
         case face, pose, eyes
@@ -101,10 +105,6 @@ import Vision
             }
     }
     
-    let dtBetweenSnapshots: TimeInterval = 0.04
-    var lastSnapshotDate: Date = Date()
-    let onePoint = false
-    
     func processFaceLandmarks(_ observations: [VNFaceObservation]) {
         faceGroups = observations.compactMap { face in
             guard let landmarks = face.landmarks,
@@ -120,7 +120,7 @@ import Vision
     }
     
     func processEyesLandmarks(_ observations: [VNFaceObservation]) {
-        guard let face = observations.first,
+        guard let face = observations.first(where: { $0.landmarks?.leftEye != nil }),
               let leftEye: VNFaceLandmarkRegion2D = face.landmarks?.leftEye else { return }
         let points = leftEye.normalizedPoints
         guard !points.isEmpty else { return }
@@ -137,11 +137,18 @@ import Vision
             x: bbox.minX + normalizedCentroid.x * bbox.width,
             y: bbox.minY + normalizedCentroid.y * bbox.height
         )
+        eyePoint = leftEyeCentroid
         
-        for i in 0..<eyeHistory.count-1 {
-            eyeHistory[i+1] = eyeHistory[i]
+        if Date().timeIntervalSince(eyesLastHistoryDate) >= eyesHistoryDeltaTime
+            // && (abs(leftEyeCentroid.x - eyeHistory[0].x) > 10 || abs(leftEyeCentroid.y - eyeHistory[0].y) > 10)
+        {
+            for i in 0..<eyeHistory.count-1 {
+                eyeHistory[i+1] = eyeHistory[i]
+            }
+            eyeHistory[0] = leftEyeCentroid
+            eyesLastHistoryDate = Date()
         }
-        eyeHistory[0] = leftEyeCentroid
+        
     }
     
     func start() async {

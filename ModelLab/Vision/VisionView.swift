@@ -106,15 +106,19 @@ struct VisionView: View {
     @ViewBuilder private var eyeLines: some View {
         Canvas { ctx, size in
             let color = colors[1]
+            
+            let eyePoint = CGPoint(x: viewModel.eyePoint.x * size.width,
+                                   y: (1-viewModel.eyePoint.y) * size.height)
+            let r = CGRect(origin: eyePoint,
+                           size: CGSize(width: 8, height: 8))
+            ctx.fill(Path(ellipseIn: r), with: .color(color))
+                     
             var path = Path()
-            for (i, point) in viewModel.eyeHistory.enumerated() {
-                let x = point.x * size.width
-                let y = (1 - point.y) * size.height
-                if i == 0 {
-                    path.move(to: .init(x: x, y: y))
-                } else {
-                    path.addLine(to: .init(x: x, y: y))
-                }
+            path.move(to: eyePoint)
+            for (_, point) in viewModel.eyeHistory.enumerated() {
+               let x = point.x * size.width
+               let y = (1 - point.y) * size.height
+               path.addLine(to: .init(x: x, y: y))
             }
             ctx.stroke(path, with: .color(color), style: .init(lineWidth: 8))
         }
