@@ -116,9 +116,10 @@ struct VisionView: View {
             var path = Path()
             path.move(to: eyePoint)
             for (_, point) in viewModel.eyeHistory.enumerated() {
-               let x = point.x * size.width
-               let y = (1 - point.y) * size.height
-               path.addLine(to: .init(x: x, y: y))
+                if point.x == -1 { break }
+                let x = point.x * size.width
+                let y = (1 - point.y) * size.height
+                path.addLine(to: .init(x: x, y: y))
             }
             ctx.stroke(path, with: .color(color), style: .init(lineWidth: 8))
         }

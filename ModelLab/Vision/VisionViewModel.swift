@@ -139,15 +139,21 @@ import Vision
         )
         eyePoint = leftEyeCentroid
         
-        if Date().timeIntervalSince(eyesLastHistoryDate) >= eyesHistoryDeltaTime
-            // && (abs(leftEyeCentroid.x - eyeHistory[0].x) > 5 || abs(leftEyeCentroid.y - eyeHistory[0].y) > 5)
-        {
-            for i in 0..<eyeHistory.count-1 {
-                eyeHistory[i+1] = eyeHistory[i]
-            }
-            eyeHistory[0] = leftEyeCentroid
-            eyesLastHistoryDate = Date()
+        let now = Date()
+        let timeSinceLast = now.timeIntervalSince(eyesLastHistoryDate)
+        guard timeSinceLast >= eyesHistoryDeltaTime else { return }
+        
+        let dx = eyeHistory[0].x - leftEyeCentroid.x
+        let dy = eyeHistory[0].y - leftEyeCentroid.y
+        let radialDist = dx*dx + dy*dy
+        let nds = 0.025 // normalized coord delta distance threshold
+        guard radialDist >= 2*nds*nds else { return }
+        
+        for i in 0..<eyeHistory.count-1 {
+            eyeHistory[i+1] = eyeHistory[i]
         }
+        eyeHistory[0] = leftEyeCentroid
+        eyesLastHistoryDate = Date()
         
     }
     
